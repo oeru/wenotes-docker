@@ -1,0 +1,99 @@
+A current WikiEducator.org or Course.oeru.org session allows you post to WENotes...
+
+- figure out how WENotes is identifying WE and Course sessions
+- Faye -> u.oerfoundation.org: node /home/node/Projects/WEnotes-server/server.js (proxies for CouchDB)
+  - running under user node, pm2 status ('pm2 show 0' will currently give the details...
+- check WP and MW WENotes extensions/plugins
+- what is live.oer.me/faye vs wenotes.wikieducator.org/faye 
+- must run couchwatch.js (in /home/ubuntu/Projects/WEnotes-tools on wenotes LXC) to watch the CouchDB mentions database for changes
+  and publish them on the correct Faye channel(s) 
+
+
+----
+New functionality to think about
+- un/following users
+- like/unlike 
+- ability to create "best post" email for users (i.e. newsletter)
+- 
+
+---
+Config - options
+
+{
+  "url": "http://bot:XNtes4.379@10.10.10.12:5984",
+  "localcouch": "http://bot:XNtes4.379@10.10.10.12:5984",
+  "couch": {
+    "user": "bot",
+    "pass": "XNtes4.379",
+    "url": "http://10.10.10.12",
+    "port": "5984"
+  },
+  "db": "mentions",
+  "dbfeeds": "feeds",
+  "dbvotes": "votes",
+  "avatars": "weavatars",
+  "server": {
+    "ip": "5.9.146.252",
+    "port": 80,
+    "secureport": "",
+    "privkey": "",
+    "fullchain": ""
+  },
+  "log": {
+	  "couchwatch": {
+		  "level": 7,
+		  "file": "/tmp/couchwatch.log"
+	  },
+	  "twitters": {
+		  "level": 7,
+		  "file": "/tmp/twitters.log"
+	  },
+	  "server": {
+		  "level": 7,
+		  "file": "/tmp/wenotes-server.log"
+	  }
+  },
+  "WEnotes": {
+    "RocketChat": {
+      "subscribe": "/WEnotes/*",
+      "channel": "#wenotes-all",
+      "webhook": "https://chat.oeru.org/hooks/Ea8AKqAZtMek8jB9u/Ei2C5gYuZWdaqD9AKaYhr2wnfGFFkjpHpuRPesjCp4ry9F5i"
+    }
+  },
+  "IRC": {
+    "botname": "WikiEducatorBot",
+    "botpass": "lat45long",
+    "ircchannel": "#wikieducator",
+    "RocketChat": {
+      "channel": "#wikieducator-irc",
+      "webhook": "https://chat.oeru.org/hooks/NFHErMsX7hhupErBX/RPsWYxikPw7rT7mMQ/Sx34LDovt4DewwtYJr1mcv25vp9d6G2zGt8bek0yOxU%3D"
+    }
+  },
+  "googleapikey": "AIzaSyBxGDarlyifcV2iZyrcUmLrd0oX6yF23aw",
+  "googleapiserverkey": "AIzaSyCj-g4w-KYlUkt8piFzIL-7m68fk2945dU",
+  "moodleuser": "jimtittsler",
+  "moodlepass": "mrexe",
+  "tags": ["wikieducator", "ocl4ed", "oeru", "wenotes", "ds4oer", "uowmun", "oeru16"],
+  "blacklist": ["asiangirl", "japanesa", "panties", "nipples", "stockings", "oppai", "tits", "bigtits", "japanav", "gangbang", "blowjob", "pantsu", "buenosaires", "escuelacuzque"],
+  "fayeurl": "http://wenotes.wikieducator.org/faye",
+  "fayepass": "only poster",
+  "twitter":  {
+     "consumer_key": "k3SMZfdMck5oAqjfBStLIA",
+     "consumer_secret": "nOWVpJ1wWhYJ6bFiXQ6LFu0zSRlWWed6YVsBlDM0",
+     "access_token_key": "56588049-5YZZjmqGEYeUp94FVBLqtJva2LOJYifeuM0ZjFSZc",
+     "access_token_secret": "RZkuZ0DGcqXvY6razKTexIXBum24llVQhf5jrBVntg"
+   },
+   "feedsMoodle":  [],
+   "gdata": {
+     "user": "bot@oerfoundation.org",
+     "pass": "Matrix42"
+   },
+   "communities": [],
+   "discourse": "https://community.oeru.org", 
+   "forums": {
+     "ds4oer": "https://forums.oeru.org/c/courses/ds4oer.json",
+     "csf101": "https://forums.oeru.org/tags/csf101.json",
+     "csf102": "https://forums.oeru.org/tags/csf102.json"
+   }
+}
+
