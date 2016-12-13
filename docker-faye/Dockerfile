@@ -27,10 +27,6 @@ ENV UBUNTU_NAME trusty
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
 #
-# Add CouchDB user account
-RUN groupadd -r couchdb && useradd -d /opt/couchdb -g couchdb couchdb
-
-#
 # add local mirror to reduce build time :)
 RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
 RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
@@ -50,8 +46,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     erlang-reltool \
     libicu52 \
     libmozjs185-1.0 \
-    openssl
-#  && rm -rf /var/lib/apt/lists/*
+    openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root and tini for signal handling
 RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
@@ -67,8 +63,6 @@ RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364
   && rm /usr/local/bin/tini.asc \
   && chmod +x /usr/local/bin/tini
 
-ENV COUCHDB_VERSION 2.0.0
-
 # install Node.JS repos and do another update...
 RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
   && echo 'deb https://deb.nodesource.com/node_4.x trusty main' > /etc/apt/sources.list.d/nodesource.list \
@@ -77,26 +71,17 @@ RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
 # Download dev dependencies
 RUN apt-get install -y --no-install-recommends \
     build-essential \
-    erlang-dev \
-    libcurl4-openssl-dev \
-    libicu-dev \
-    libmozjs185-dev \
- # install nodejs stack...
- && apt-get install -y nodejs \
- && npm install -g grunt-cli
- # set up pm2
- RUN npm install -g pm2
- # Acquire CouchDB source code
- RUN cd /usr/src && mkdir couchdb \
- && curl -fSL https://dist.apache.org/repos/dist/release/couchdb/source/2.0.0/apache-couchdb-$COUCHDB_VERSION.tar.gz -o couchdb.tar.gz \
- && tar -xzf couchdb.tar.gz -C couchdb --strip-components=1 \
- && cd couchdb \
- # Build the release and install into /opt
- && ./configure --disable-docs \
- && make release \
- && mv /usr/src/couchdb/rel/couchdb /opt/ \
- # Cleanup build detritus
-# && apt-get purge -y \
+#    erlang-dev \
+#    libcurl4-openssl-dev \
+#    libicu-dev \
+#    libmozjs185-dev \
+# install nodejs stack...
+  && apt-get install -y nodejs \
+  && npm install -g grunt-cli
+# set up pm2
+RUN npm install -g pm2
+# Cleanup build detritus
+#RUN && apt-get purge -y \
 #    binutils \
 #    build-essential \
 #    cpp \
@@ -104,32 +89,19 @@ RUN apt-get install -y --no-install-recommends \
 #    libicu-dev \
 #    make \
 #    perl \
- && apt-get autoremove -y && apt-get clean \
- && apt-get install -y libicu52 --no-install-recommends \
-# && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules /usr/src/couchdb*
- && rm -rf /usr/src/couchdb*
+RUN apt-get autoremove -y && apt-get clean
+# && apt-get install -y libicu52 --no-install-recommends
 
-
-# Sprinkle couchdb configuration to the right places...
-COPY couchdb/local.ini /opt/couchdb/etc/
-COPY couchdb/vm.args /opt/couchdb/etc/
-COPY couchdb/couchdb-init.sh /
-
-# Setup directories and permissions
-RUN chmod +x /couchdb-init.sh \
- && mkdir /opt/couchdb/data /opt/couchdb/etc/local.d /opt/couchdb/etc/default.d \
- && chown -R couchdb:couchdb /opt/couchdb/
-
- # Set up the language variables
- ENV LANG en_NZ.UTF-8
- ENV LANGUAGE en_NZ.UTF-8
- ENV LC_ALL en_NZ.UTF-8
- # Compile the language spec
- RUN locale-gen $LANG
- #
- # Some final exports to get the environment right...
- RUN echo "export VISIBLE=now" >> /etc/profile \
-   && echo "export TERM=xterm" >> /etc/bash.bashrc
+# Set up the language variables
+ENV LANG en_NZ.UTF-8
+ENV LANGUAGE en_NZ.UTF-8
+ENV LC_ALL en_NZ.UTF-8
+# Compile the language spec
+RUN locale-gen $LANG
+#
+# Some final exports to get the environment right...
+RUN echo "export VISIBLE=now" >> /etc/profile \
+  && echo "export TERM=xterm" >> /etc/bash.bashrc
 
 # set up the various scripts we need to run on the container
 # after it's built...
@@ -138,8 +110,8 @@ COPY ./conf /root/conf/
 RUN chmod u+x /root/conf/*.sh
 
 # expose relevant ports
-EXPOSE 80 5984 4369 9100
-VOLUME ["/opt/couchdb/data", "/opt/wenotes"]
+EXPOSE 8380
+# VOLUME ["/opt/wenotes"]
 
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"

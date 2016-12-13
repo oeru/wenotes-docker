@@ -2,7 +2,23 @@ From https://github.com/klaemo/docker-couchdb/tree/master/2.0.0
 
 See https://github.com/klaemo/docker-couchdb for documentation
 
+==Starting CouchDB==
+
+docker run -d --name couchdb -v /home/dave/Docker/couchdb/data:/opt/couchdb/data oeru/couchdb
+
+
+--Old--
+
 Built via: docker build -t oeru/couchdb .
 
-Launched via: docker run --name couchdb -v /home/dave/Docker/wenotes/data:/opt/couchdb/data -d oeru/couchdb
+==Building and Running Containers==
 
+===CouchDB===
+Build: docker build -t oeru/couchdb docker-couchdb
+Launch (replacing [password]):
+  docker run --name couchdb -v /home/dave/Docker/wenotes/data:/opt/couchdb/data \
+    -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=[password] -d oeru/couchdb
+
+===Faye===
+Build: docker build -t oeru/faye docker-faye
+Launch: docker run --name faye -v /home/dave/Docker/wenotes/faye:/opt/wenotes/server -d oeru/faye

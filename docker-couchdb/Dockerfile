@@ -26,9 +26,10 @@ ENV APT_FILE sources.list
 ENV UBUNTU_NAME trusty
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
+ENV COUCHDIR /opt/couchdb
 #
 # Add CouchDB user account
-RUN groupadd -r couchdb && useradd -d /opt/couchdb -g couchdb couchdb
+RUN groupadd -r couchdb && useradd -d $COUCHDIR -g couchdb couchdb
 
 #
 # add local mirror to reduce build time :)
@@ -50,8 +51,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     erlang-reltool \
     libicu52 \
     libmozjs185-1.0 \
-    openssl
-#  && rm -rf /var/lib/apt/lists/*
+    openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root and tini for signal handling
 RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
@@ -81,70 +82,58 @@ RUN apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libicu-dev \
     libmozjs185-dev \
- # install nodejs stack...
- && apt-get install -y nodejs \
- && npm install -g grunt-cli
- # set up pm2
- RUN npm install -g pm2
- # Acquire CouchDB source code
- RUN cd /usr/src && mkdir couchdb \
- && curl -fSL https://dist.apache.org/repos/dist/release/couchdb/source/2.0.0/apache-couchdb-$COUCHDB_VERSION.tar.gz -o couchdb.tar.gz \
- && tar -xzf couchdb.tar.gz -C couchdb --strip-components=1 \
- && cd couchdb \
- # Build the release and install into /opt
- && ./configure --disable-docs \
- && make release \
- && mv /usr/src/couchdb/rel/couchdb /opt/ \
- # Cleanup build detritus
-# && apt-get purge -y \
-#    binutils \
-#    build-essential \
-#    cpp \
-#    erlang-dev \
-#    libicu-dev \
-#    make \
-#    perl \
- && apt-get autoremove -y && apt-get clean \
- && apt-get install -y libicu52 --no-install-recommends \
-# && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules /usr/src/couchdb*
- && rm -rf /usr/src/couchdb*
-
+  # install nodejs stack...
+  && apt-get install -y nodejs \
+  && npm install -g grunt-cli
+  # set up pm2
+  #RUN npm install -g pm2
+  # Acquire CouchDB source code
+  RUN cd /usr/src && mkdir couchdb \
+  && curl -fSL https://dist.apache.org/repos/dist/release/couchdb/source/2.0.0/apache-couchdb-$COUCHDB_VERSION.tar.gz -o couchdb.tar.gz \
+  && tar -xzf couchdb.tar.gz -C couchdb --strip-components=1 \
+  && cd couchdb \
+  # Build the release and install into /opt
+  && ./configure --disable-docs \
+  && make release \
+  && mv /usr/src/couchdb/rel/couchdb $COUCHDIR \
+  # Cleanup build detritus
+  && apt-get purge -y \
+    binutils \
+    build-essential \
+    cpp \
+    git \
+    erlang-dev \
+    libicu-dev \
+    make \
+    perl \
+  && apt-get autoremove -y && apt-get clean \
+  && apt-get install -y libicu52 --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules /usr/src/couchdb*
 
 # Sprinkle couchdb configuration to the right places...
-COPY couchdb/local.ini /opt/couchdb/etc/
-COPY couchdb/vm.args /opt/couchdb/etc/
+COPY couchdb/local.ini ${COUCHDIR}/etc/
+COPY couchdb/vm.args ${COUCHDIR}/etc/
 COPY couchdb/couchdb-init.sh /
 
 # Setup directories and permissions
 RUN chmod +x /couchdb-init.sh \
- && mkdir /opt/couchdb/data /opt/couchdb/etc/local.d /opt/couchdb/etc/default.d \
- && chown -R couchdb:couchdb /opt/couchdb/
+  && mkdir ${COUCHDIR}/data ${COUCHDIR}/etc/local.d ${COUCHDIR}/etc/default.d \
+  && chown -R couchdb:couchdb ${COUCHDIR}
 
- # Set up the language variables
- ENV LANG en_NZ.UTF-8
- ENV LANGUAGE en_NZ.UTF-8
- ENV LC_ALL en_NZ.UTF-8
- # Compile the language spec
- RUN locale-gen $LANG
- #
- # Some final exports to get the environment right...
- RUN echo "export VISIBLE=now" >> /etc/profile \
-   && echo "export TERM=xterm" >> /etc/bash.bashrc
-
-# set up the various scripts we need to run on the container
-# after it's built...
-COPY ./conf /root/conf/
-#Prepare the main install script
-RUN chmod u+x /root/conf/*.sh
+# Set up the language variables
+ENV LANG en_NZ.UTF-8
+ENV LANGUAGE en_NZ.UTF-8
+ENV LC_ALL en_NZ.UTF-8
+# Compile the language spec
+RUN locale-gen $LANG
+#
+# Some final exports to get the environment right...
+RUN echo "export VISIBLE=now" >> /etc/profile \
+  && echo "export TERM=xterm" >> /etc/bash.bashrc
 
 # expose relevant ports
-EXPOSE 80 5984 4369 9100
-VOLUME ["/opt/couchdb/data", "/opt/wenotes"]
-
-# First, say we're doing it
-RUN echo "running run.sh - /root/conf/run.sh"
-# Actually do it.
-RUN /root/conf/run.sh
-# Say we're finished
-RUN echo "finished run.sh"
-CMD ["/bin/bash"]
+WORKDIR ${COUCHDIR}
+EXPOSE 5984 4369 9100
+VOLUME ["${COUCHDIR}/data"]
+ENTRYPOINT ["tini", "--", "/couchdb-init.sh"]
+CMD ["/opt/couchdb/bin/couchdb"]

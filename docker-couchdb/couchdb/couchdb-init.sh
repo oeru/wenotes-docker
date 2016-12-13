@@ -28,7 +28,14 @@ if [ "$1" = '/opt/couchdb/bin/couchdb' ]; then
 
 	if [ "$COUCHDB_USER" ] && [ "$COUCHDB_PASSWORD" ]; then
 		# Create admin
+        echo "Setting admin access details"
 		printf "[admins]\n%s = %s\n" "$COUCHDB_USER" "$COUCHDB_PASSWORD" > /opt/couchdb/etc/local.d/docker.ini
+        if [ "$COUCHDB_PROXYSECRET" ]; then
+            echo "Setting a proxy secret"
+            printf "[couch_httpd_auth\]\nrequire_valid_user = true\nsecret = %s\n" "$COUCHDB_PROXYSECRET" >> /opt/couchdb/etc/local.d/docker.ini
+        else
+            printf "[couch_httpd_auth\]\nrequire_valid_user = true\n" >> /opt/couchdb/etc/local.d/docker.ini
+        fi
 		chown couchdb:couchdb /opt/couchdb/etc/local.d/docker.ini
 	fi
 

@@ -5,12 +5,10 @@
 # Run start script.
 echo "*****Running run.sh"
 CONF=/root/conf
-COUCH=/root
 WENOTES=/opt/wenotes
 CWD=`pwd`
 # Defines
 WESERVER=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-server.git
-WETOOLS=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-tools.git
 GIT=`which git`
 NPM=`which npm`
 PM2=`which pm2`
@@ -28,7 +26,6 @@ if [[ -d $CONF/before-start ]] ; then
   done
 fi
 
-
 if [[ -f $CONF/pre-install.sh ]] ; then
   echo "Running: pre-install.sh"
   source $CONF/pre-install.sh
@@ -36,22 +33,16 @@ fi
 
 echo "starting services"
 
-# first start couchdb
-if [[ -f $COUCH/couchdb-init.sh ]] ; then
-    echo "starting couchdb via $COUCH/couchdb-init.sh"
-    $PM2 start --no-daemon $COUCH/couchdb-init.sh
-fi
-
 # next, get the Javascript code:
 # get the repo
 echo "moving to $WENOTES"
+if [[ ! -d $WENOTES ]] ; then
+    echo "creating directory $WENOTES"
+    mkdir -p $WENOTES
+fi
 cd $WENOTES
 echo "getting $WESERVER, putting it into server"
 $GIT clone $WESERVER server
-# get the repo
-echo "getting $WETOOLS, putting it into server"
-$GIT clone $WETOOLS tools
-# set up options.json
 
 
 # next start various Javascript services
@@ -60,20 +51,9 @@ if [[ -f $CONF/faye.yml ]] ; then
     cd $WENOTES/server
     echo "installing Node.JS dependencies"
     $NPM install
-    $CP $CONF/options.json.sample options.json
+    $CP $CONF/options.json options.json
     echo "starting pm2 to supervise scripts in $CONF/faye.yml"
     $PM2 start --no-daemon $CONF/faye.yml
-    cd $WENOTES
-fi
-
-# next start various Javascript services
-if [[ -f $CONF/services.yml ]] ; then
-    cd $WENOTES/tools
-    echo "installing Node.JS dependencies"
-    $NPM install
-    $CP $CONF/options.json.sample options.json
-    echo "starting pm2 to supervise scripts in $CONF/services.yml"
-    $PM2 start --no-daemon $CONF/services.yml
     cd $WENOTES
 fi
 
