@@ -13,34 +13,34 @@
 
 set -e
 
-if [ "$1" = '/opt/couchdb/bin/couchdb' ]; then
-	# we need to set the permissions here because docker mounts volumes as root
-	chown -R couchdb:couchdb /opt/couchdb
+if [ "$1" = '/usr/bin/couchdb' ]; then
 
-	chmod -R 0770 /opt/couchdb/data
-
-	chmod 664 /opt/couchdb/etc/*.ini
-	chmod 775 /opt/couchdb/etc/*.d
-
-	if [ ! -z "$NODENAME" ] && ! grep "couchdb@" /opt/couchdb/etc/vm.args; then
-		echo "-name couchdb@$NODENAME" >> /opt/couchdb/etc/vm.args
+	if [ ! -z "$NODENAME" ] && ! grep "couchdb@" /etc/couchdb/vm.args; then
+		echo "-name couchdb@$NODENAME" >> /etc/couchdb/vm.args
 	fi
+
+    DOCKERFILE=/etc/couchdb/local.d/docker.ini
+
+    printf "[chttpd]\nbind_address = any\n" > $DOCKERFILE
 
 	if [ "$COUCHDB_USER" ] && [ "$COUCHDB_PASSWORD" ]; then
 		# Create admin
         echo "Setting admin access details"
-		printf "[admins]\n%s = %s\n" "$COUCHDB_USER" "$COUCHDB_PASSWORD" > /opt/couchdb/etc/local.d/docker.ini
+		printf "[admins]\n%s = %s\n" "$COUCHDB_USER" "$COUCHDB_PASSWORD" >> $DOCKERFILE
+        if [ "$COUCHDB_BOT_USER" ] && [ "$COUCHDB_BOT_PASSWORD" ]; then
+            printf "%s = %s\n" "$COUCHDB_BOT_USER" "$COUCHDB_BOT_PASSWORD" >> $DOCKERFILE
+        fi
         if [ "$COUCHDB_PROXYSECRET" ]; then
             echo "Setting a proxy secret"
-            printf "[couch_httpd_auth\]\nrequire_valid_user = true\nsecret = %s\n" "$COUCHDB_PROXYSECRET" >> /opt/couchdb/etc/local.d/docker.ini
+            printf "[couch_httpd_auth\]\nrequire_valid_user = true\nsecret = %s\n" "$COUCHDB_PROXYSECRET" >> $DOCKERFILE
         else
-            printf "[couch_httpd_auth\]\nrequire_valid_user = true\n" >> /opt/couchdb/etc/local.d/docker.ini
+            printf "[couch_httpd_auth\]\nrequire_valid_user = true\n" >> $DOCKERFILE
         fi
-		chown couchdb:couchdb /opt/couchdb/etc/local.d/docker.ini
+		chown couchdb:couchdb $DOCKERFILE
 	fi
 
 	# if we don't find an [admins] section followed by a non-comment, display a warning
-	if ! grep -Pzoqr '\[admins\]\n[^;]\w+' /opt/couchdb/etc/local.d/*.ini; then
+	if ! grep -Pzoqr '\[admins\]\n[^;]\w+' /etc/couchdb/local.d/*.ini; then
 		# The - option suppresses leading tabs but *not* spaces. :)
 		cat >&2 <<-'EOWARN'
 			****************************************************
