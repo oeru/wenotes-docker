@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 
 MAINTAINER Dave Lane dave@oerfoundation.org
 # (adapted from work by Clemens Stolle klaemo@apache.org)
@@ -23,7 +23,7 @@ MAINTAINER Dave Lane dave@oerfoundation.org
 # updating details for session validation, and possibly integrating Mautic...
 ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
 ENV APT_FILE sources.list
-ENV UBUNTU_NAME trusty
+ENV UBUNTU_NAME xenial
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
 ENV COUCHDIR /opt/couchdb
@@ -49,7 +49,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     haproxy \
     erlang-nox \
     erlang-reltool \
-    libicu52 \
+#    libicu52 \
     libmozjs185-1.0 \
     openssl \
   && rm -rf /var/lib/apt/lists/*
@@ -107,7 +107,7 @@ RUN apt-get install -y --no-install-recommends \
     make \
     perl \
   && apt-get autoremove -y && apt-get clean \
-  && apt-get install -y libicu52 --no-install-recommends \
+ # && apt-get install -y libicu52 --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules /usr/src/couchdb*
 
 # Sprinkle couchdb configuration to the right places...
