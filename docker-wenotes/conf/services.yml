@@ -1,0 +1,19 @@
+# from http://pm2.keymetrics.io/docs/usage/docker-pm2-nodejs/
+# and https://medium.com/@adriendesbiaux/node-js-pm2-docker-docker-compose-devops-907dedd2b69a#.5nb54aom6
+apps:
+    - script : 'couchwatch.js'
+      name : 'CouchWatch'
+      merge_logs : true
+      out_file : '/tmp/couchwatch.log'
+    - script : 'twitter.js'
+      name : 'Twitter Watcher'
+      merge_logs : true
+      out_file : '/tmp/twitter.log'
+    - script : 'irc.js'
+      name : 'IRC Watcher'
+      merge_logs : true
+      out_file : '/tmp/irc.log'
+    - script : 'wenotestochat.js'
+      name : 'WENotes to Chat'
+      merge_logs : true
+      out_file : '/tmp/wenotestochat.log'

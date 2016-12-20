@@ -1,0 +1,75 @@
+{
+  "url": "http://bot:[couchpass]@localhost:5984",
+  "localcouch": "http://bot:[couchpass]@localhost:5984",
+  "couch": {
+    "user": "bot",
+    "pass": "[couchpass]",
+    "url": "http://localhost",
+    "port": 5984
+  },
+  "db": "mentions",
+  "dbfeeds": "feeds",
+  "dbvotes": "votes",
+  "avatars": "weavatars",
+  "server": {
+    "ip": "localhost",
+    "port": 80,
+    "secureport": "",
+    "privkey": "",
+    "fullchain": ""
+  },
+  "log": {
+	  "couchwatch": {
+		  "level": 7,
+		  "file": "/tmp/couchwatch.log"
+	  },
+	  "twitters": {
+		  "level": 7,
+		  "file": "/tmp/twitters.log"
+	  },
+	  "server": {
+		  "level": 7,
+		  "file": "/tmp/wenotes-server.log"
+	  }
+  },
+  "WEnotes": {
+    "RocketChat": {
+      "subscribe": "/WEnotes/*",
+      "channel": "#wenotes-all",
+      "webhook": "https://chat.oeru.org/hooks/[chat_wenotes-all]"
+    }
+  },
+  "IRC": {
+    "botname": "WikiEducatorBot",
+    "botpass": "lat45long",
+    "ircchannel": "#wikieducator",
+    "RocketChat": {
+      "channel": "#wikieducator-irc",
+      "webhook": "https://chat.oeru.org/hooks/[chat_wikieducator-irc]"
+    }
+  },
+  "googleapikey": "[google-api-key]",
+  "googleapiserverkey": "[google-api-serverkey]",
+  "moodleuser": "jimtittsler",
+  "moodlepass": "mrexe",
+  "tags": ["wikieducator", "ocl4ed", "oeru", "wenotes", "ds4oer", "uowmun", "oeru16"],
+  "blacklist": ["asiangirl", "japanesa", "panties", "nipples", "stockings", "oppai", "tits", "bigtits", "japanav", "gangbang", "blowjob", "pantsu", "buenosaires", "escuelacuzque"],
+  "fayeurl": "http://localhost/faye",
+  "fayepass": "[faye_pass]",
+  "twitter":  {
+     "consumer_key": "[twitter_consumer-key]",
+     "consumer_secret": "[twitter_consumer-secret]",
+     "access_token_key": "[twitter_accesstoken-key]",
+     "access_token_secret": "[twitter_accesstoken-secret]"
+   },
+   "feedsMoodle":  "[]",
+   "gdata": {
+     "user": "bot@oerfoundation.org",
+     "pass": "[gdata]"
+   },
+   "communities": "[]",
+   "discourse": "https://community.oeru.org",
+   "forums": {
+     "partner101": "https://forums.oeru.org/c/courses/partner101.json",
+   }
+}
