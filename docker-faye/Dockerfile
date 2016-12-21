@@ -70,27 +70,13 @@ RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
   && apt-get update -y -qq
 # Download dev dependencies
 RUN apt-get install -y --no-install-recommends \
-    build-essential \
-#    erlang-dev \
-#    libcurl4-openssl-dev \
-#    libicu-dev \
-#    libmozjs185-dev \
+  build-essential \
 # install nodejs stack...
   && apt-get install -y nodejs \
   && npm install -g grunt-cli
 # set up pm2
 RUN npm install -g pm2
-# Cleanup build detritus
-#RUN && apt-get purge -y \
-#    binutils \
-#    build-essential \
-#    cpp \
-#    erlang-dev \
-#    libicu-dev \
-#    make \
-#    perl \
 RUN apt-get autoremove -y && apt-get clean
-# && apt-get install -y libicu52 --no-install-recommends
 
 # Set up the language variables
 ENV LANG en_NZ.UTF-8
@@ -110,13 +96,10 @@ COPY ./conf /root/conf/
 RUN chmod u+x /root/conf/*.sh
 
 # expose relevant ports
-EXPOSE 8380
-# VOLUME ["/opt/wenotes"]
-
+EXPOSE 80
+VOLUME ["/opt/wenotes/server", "/opt/wenotes/server/options.json"]
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"
-# Actually do it.
-RUN /root/conf/run.sh
-# Say we're finished
-RUN echo "finished run.sh"
-CMD ["/bin/bash"]
+# Actually do it when we run the container.
+ENTRYPOINT ["tini", "--", "/root/conf/run.sh"]
+CMD ["faye"]

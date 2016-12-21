@@ -31,34 +31,43 @@ if [[ -f $CONF/pre-install.sh ]] ; then
   source $CONF/pre-install.sh
 fi
 
-echo "starting services"
+echo "arg 1 = $1"
 
-# next, get the Javascript code:
-# get the repo
-echo "moving to $WENOTES"
-if [[ ! -d $WENOTES ]] ; then
-    echo "creating directory $WENOTES"
-    mkdir -p $WENOTES
-fi
-cd $WENOTES
-echo "getting $WESERVER, putting it into server"
-$GIT clone $WESERVER server
+if [ "$1" = 'faye' ]; then
 
+    echo "starting services"
 
-# next start various Javascript services
-if [[ -f $CONF/faye.yml ]] ; then
-    echo "moving to server"
-    cd $WENOTES/server
-    echo "installing Node.JS dependencies"
-    $NPM install
-    $CP $CONF/options.json options.json
-    echo "starting pm2 to supervise scripts in $CONF/faye.yml"
-    $PM2 start --no-daemon $CONF/faye.yml
+    # next, get the Javascript code:
+    # get the repo
+    echo "moving to $WENOTES"
+    if [[ ! -d $WENOTES ]] ; then
+        echo "creating directory $WENOTES"
+        mkdir -p $WENOTES
+    fi
     cd $WENOTES
-fi
+    echo "getting $WESERVER, putting it into server"
+    $GIT clone $WESERVER server
 
-echo "returning to original dir: $CWD"
-cd $CWD
+
+    # next start various Javascript services
+    if [[ -f $CONF/faye.yml ]] ; then
+        echo "moving to server"
+        cd $WENOTES/server
+        echo "installing Node.JS dependencies"
+        $NPM install
+        # this will be provided on the local filesystem, linked via a volume...
+        # $CP $CONF/options.json options.json
+        echo "starting pm2 to supervise scripts in $CONF/faye.yml"
+        $PM2 start --no-daemon $CONF/faye.yml
+        #$PM2 start $CONF/faye.yml
+        cd $WENOTES
+    fi
+
+    echo "returning to original dir: $CWD"
+    cd $CWD
+else
+    echo "no-op!"
+fi
 
 echo "finished services"
 
