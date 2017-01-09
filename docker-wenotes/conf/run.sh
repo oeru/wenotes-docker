@@ -9,12 +9,12 @@ COUCH=/root
 WENOTES=/opt/wenotes
 CWD=`pwd`
 # Defines
-WESERVER=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-server.git
 WETOOLS=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-tools.git
 GIT=`which git`
 NPM=`which npm`
 PM2=`which pm2`
 CP=`which cp`
+CRON=/etc/cron.d/wenotes
 
 echo "CWD=$CWD, GIT=$GIT"
 
@@ -28,7 +28,6 @@ if [[ -d $CONF/before-start ]] ; then
   done
 fi
 
-
 if [[ -f $CONF/pre-install.sh ]] ; then
   echo "Running: pre-install.sh"
   source $CONF/pre-install.sh
@@ -36,44 +35,39 @@ fi
 
 echo "starting services"
 
-# first start couchdb
-if [[ -f $COUCH/couchdb-init.sh ]] ; then
-    echo "starting couchdb via $COUCH/couchdb-init.sh"
-    $PM2 start --no-daemon $COUCH/couchdb-init.sh
-fi
-
 # next, get the Javascript code:
 # get the repo
 echo "moving to $WENOTES"
-cd $WENOTES
-echo "getting $WESERVER, putting it into server"
-$GIT clone $WESERVER server
 # get the repo
 echo "getting $WETOOLS, putting it into server"
+cd /tmp
 $GIT clone $WETOOLS tools
+cd $WENOTES
+if [[ -d $WENOTES/tools ]] ; then
+    echo "$WENOTES/tools already exists - moving /tmp/tools/* there..."
+    cp -a /tmp/tools/* $WENOTES/tools
+else
+    echo "creating $WENOTES/tools"
+    mv /tmp/tools $WENOTES
+fi
 # set up options.json
 
-
-# next start various Javascript services
-if [[ -f $CONF/faye.yml ]] ; then
-    echo "moving to server"
-    cd $WENOTES/server
-    echo "installing Node.JS dependencies"
-    $NPM install
-    $CP $CONF/options.json.sample options.json
-    echo "starting pm2 to supervise scripts in $CONF/faye.yml"
-    $PM2 start --no-daemon $CONF/faye.yml
-    cd $WENOTES
-fi
+# set up Cron jobs...
+echo "setting up cron jobs"
+echo "# created by Docker and the OER Foundation" > $CRON
+echo "4,24,44 * * * * root cd $WENOTES/tools/ && nice python gplus.py && nice python feeds.py && nice python groups.py" >> $CRON
+echo "2,22,42 * * * * root cd $WENOTES/tools/ && nice python forums.py && nice python discourse.py --full " >> $CRON
+chmod 0644 $CRON
 
 # next start various Javascript services
 if [[ -f $CONF/services.yml ]] ; then
     cd $WENOTES/tools
     echo "installing Node.JS dependencies"
     $NPM install
-    $CP $CONF/options.json.sample options.json
+    #$CP $CONF/options.json.sample options.json
     echo "starting pm2 to supervise scripts in $CONF/services.yml"
     $PM2 start --no-daemon $CONF/services.yml
+    #$PM2 start $CONF/services.yml
     cd $WENOTES
 fi
 

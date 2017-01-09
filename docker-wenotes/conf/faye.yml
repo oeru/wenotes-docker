@@ -1,5 +1,0 @@
-apps:
-    - script : 'server.js'
-      name : 'Faye Server'
-      merge_logs : true
-      out_file : '/tmp/server.log'
