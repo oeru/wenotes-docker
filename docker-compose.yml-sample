@@ -1,0 +1,33 @@
+version: '2'
+services:
+  couchdb:
+    restart: unless-stopped
+    image: oeru/couchdb2
+    ports:
+      - "127.0.0.1:5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=[admin-pass]
+      - COUCHDB_BOT_USER=bot
+      - COUCHDB_BOT_PASSWORD=[bot-pass]
+    volumes:
+      - [local data path]/couchdb:/opt/couchdb/data
+  faye:
+    restart: unless-stopped
+    image: oeru/faye
+    ports:
+      - "127.0.0.1:8380:80"
+    depends_on:
+      - couchdb
+    volumes:
+      - [local data path]/faye:/opt/wenotes/server
+      - [local data path]/config/options.json:/opt/wenotes/server/options.json
+  wenotes-tools:
+    restart: unless-stopped
+    image: oeru/wenotes-tools
+    depends_on:
+      - couchdb
+      - faye
+    volumes:
+      - [local data path]/tools:/opt/wenotes/tools
+      - [local data path]/config/options.json:/opt/wenotes/tools/options.json
