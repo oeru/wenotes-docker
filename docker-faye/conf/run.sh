@@ -5,7 +5,7 @@
 # Run start script.
 echo "*****Running run.sh"
 CONF=/root/conf
-WENOTES=/opt/wenotes
+WENOTES=/opt/wenotes/server
 CWD=`pwd`
 # Defines
 WESERVER=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-server.git

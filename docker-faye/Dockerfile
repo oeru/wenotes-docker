@@ -46,6 +46,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     erlang-reltool \
 #    libicu52 \
     libmozjs185-1.0 \
+    locales \
     openssl \
   && rm -rf /var/lib/apt/lists/*
 
