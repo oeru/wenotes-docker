@@ -51,6 +51,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     haproxy \
     less \
     libmozjs185-1.0 \
+    locales \
     openssl \
     python \
     python-bs4 \
