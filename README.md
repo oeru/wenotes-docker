@@ -2,23 +2,20 @@ From https://github.com/klaemo/docker-couchdb/tree/master/2.0.0
 
 See https://github.com/klaemo/docker-couchdb for documentation
 
-Starting CouchDB
-================
+# Starting CouchDB
 
 docker run -d --name couchdb -v /home/dave/Docker/couchdb/data:/opt/couchdb/data oeru/couchdb
 
 
---Old--
+# Old
 
 Built via: docker build -t oeru/couchdb .
 
-Building and Running Containers
--------------------------------
+## Building and Running Containers
 
 cd [path to wenotes-combined]
 
-CouchDB
-+++++++
+### CouchDB
 
 Build: docker build -t oeru/couchdb docker-couchdb
 Launch (replacing [admin password] and [bot password]):
@@ -27,13 +24,11 @@ Launch (replacing [admin password] and [bot password]):
     -e COUCHDB_BOT_USER=bot -e COUCHDB_BOT_PASSWORD=[bot password] \
     -d oeru/couchdb
     
-Backup/Restore
-++++++++++++++
+### Backup/Restore
 
 Do a database dumps and restores using couchdb-backup.sh - from https://github.com/danielebailo/couchdb-dump
 
-Faye
-++++
+### Faye
 
 Build: docker build -t oeru/faye docker-faye
 Launch:
@@ -41,8 +36,7 @@ Launch:
      -v /home/dave/Docker/wenotes/config/options.json:/opt/wenotes/options.json \
      -d oeru/faye
 
-WENotes-tools
-+++++++++++++
+### WENotes-tools
 
 Build: docker build -t oeru/wenotes docker-wenotes-tools
 Launch:
