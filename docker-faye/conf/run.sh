@@ -5,7 +5,7 @@
 # Run start script.
 echo "*****Running run.sh"
 CONF=/root/conf
-WENOTES=/opt/wenotes/server
+WENOTES=/opt/wenotes
 CWD=`pwd`
 # Defines
 WESERVER=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-server.git
@@ -52,15 +52,18 @@ if [ "$1" = 'faye' ]; then
     # next start various Javascript services
     if [[ -f $CONF/faye.yml ]] ; then
         echo "moving to server"
-        cd $WENOTES/server
-        echo "installing Node.JS dependencies"
-        $NPM install
-        # this will be provided on the local filesystem, linked via a volume...
-        # $CP $CONF/options.json options.json
-        echo "starting pm2 to supervise scripts in $CONF/faye.yml"
-        $PM2 start --no-daemon $CONF/faye.yml
-        #$PM2 start $CONF/faye.yml
-        cd $WENOTES
+        if [[ -d $WENOTES/server ]] ; then
+          cd $WENOTES/server
+          echo "installing Node.JS dependencies"
+          $NPM install
+          # this will be provided on the local filesystem, linked via a volume...
+          # $CP $CONF/options.json options.json
+          echo "starting pm2 to supervise scripts in $WENOTES/server/conf/faye.yml"
+          $PM2 start --no-daemon conf/faye.yml
+          #$PM2 start $CONF/faye.yml
+          cd $WENOTES
+        else
+          echo "***looks like clone of wenotes-server failed - it's not in $WENOTES/server..."
     fi
 
     echo "returning to original dir: $CWD"
