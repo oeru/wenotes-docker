@@ -98,7 +98,7 @@ RUN chmod u+x /root/conf/*.sh
 
 # expose relevant ports
 EXPOSE 80
-VOLUME ["/opt/wenotes", "/opt/wenotes/options.json"]
+VOLUME ["/opt/wenotes/server", "/opt/wenotes/options.json"]
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"
 # Actually do it when we run the container.

@@ -5,7 +5,7 @@
 # Run start script.
 echo "*****Running run.sh"
 CONF=/root/conf
-WENOTES=/opt/wenotes
+WENOTES=/opt/wenotes/server
 CWD=`pwd`
 # Defines
 WESERVER=https://kiwilightweight@bitbucket.org/wikieducator/wenotes-server.git
@@ -48,7 +48,6 @@ if [ "$1" = 'faye' ]; then
     echo "getting $WESERVER, putting it into server"
     $GIT clone $WESERVER server
 
-
     # next start various Javascript services
     if [[ -f $CONF/faye.yml ]] ; then
         echo "moving to server"
@@ -58,14 +57,29 @@ if [ "$1" = 'faye' ]; then
             cp -a $CONF .
             echo "installing Node.JS dependencies"
             $NPM install
-            # this will be provided on the local filesystem, linked via a volume...
-            # $CP $CONF/options.json options.json
+            # if a phantom options.json *directory* has been created, remove it
+            if [[ -d options.json ]] ; then
+                echo "*** phantom options.json directory created - removing"
+                rmdir options.json
+                if [[ -d options.json ]] ; then 
+                    echo "*** *** failed to remove the directory... "
+                fi
+            fi
+            # if the options.json file's not there, link it from $WENOTES
+            if [[ ! -f options.json ]] ; then 
+                echo "no options.json found in $WENOTES/server..."
+                if [[ -f ../options.json ]] ; then 
+                    echo "found options.json in .., linking here"
+                    ln -sf ../options.json .
+                else
+                    echo "couldn't find options.json! This isn't going to work without manual intervention"
+                fi 
+            fi 
             echo "starting pm2 to supervise scripts in $WENOTES/server/conf/faye.yml"
             $PM2 start --no-daemon conf/faye.yml
-            #$PM2 start $CONF/faye.yml
             cd $WENOTES
         else
-          echo "***looks like clone of wenotes-server failed - it's not in $WENOTES/server..."
+            echo "***looks like clone of wenotes-server failed - it's not in $WENOTES/server..."
         fi
     fi
 
