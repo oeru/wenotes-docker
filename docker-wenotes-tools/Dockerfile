@@ -61,7 +61,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     python-html5lib \
     python-lxml \
     python-pip \
-    python-urllib3
+    python-urllib3 \
+    rsyslog
 
 # grab gosu for easy step-down from root and tini for signal handling
 RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
@@ -114,7 +115,9 @@ COPY ./conf /root/conf/
 RUN chmod u+x /root/conf/*.sh
 
 # expose relevant ports
-VOLUME ["/opt/wenotes/tools",  "/opt/wenotes/tools/options.json"]
+VOLUME ["/opt/wenotes/tools"]
+VOLUME ["/opt/wenotes/logs"]
+VOLUME ["/opt/wenotes/tools/options.json"]
 
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"

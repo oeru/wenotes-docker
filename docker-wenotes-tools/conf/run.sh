@@ -55,8 +55,13 @@ fi
 # set up Cron jobs...
 echo "setting up cron jobs"
 echo "# created by Docker and the OER Foundation" > $CRON
-echo "4,24,44 * * * * root cd $WENOTES/tools/ && nice python gplus.py && nice python feeds.py && nice python groups.py" >> $CRON
-echo "2,22,42 * * * * root cd $WENOTES/tools/ && nice python forums.py && nice python discourse.py --full " >> $CRON
+echo "LOG=/opt/wenotes/cronttest" >> $CRON
+echo "WEDIR=/opt/wenotes/tools" >> $CRON
+echo "PY=/usr/bin/python"
+echo '8,18,28,38,48,58 * * * * root cd $WEDIR && nice $PY bookmarks.py && nice $PY medium.py' >> $CRON
+echo '6,16,26,36,46,56 * * * * root cd $WEDIR && nice $PY mastodon.py && nice $PY hypothesis.py' >> $CRON
+echo '4,14,24,34,44,54 * * * * root cd $WEDIR && nice $PY gplus.py && nice $PY feeds.py && nice $PY groups.py' >> $CRON
+echo '2,12,22,32,42,52 * * * * root cd $WEDIR && nice $PY forums.py && nice $PY discourse.py --full' >> $CRON
 chmod 0644 $CRON
 
 # next start various Javascript services
