@@ -59,10 +59,12 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     python-couchdb \
     python-feedparser \
     python-html5lib \
+    python-httplib2 \
+    python-lxml \
     python-lxml \
     python-pip \
-    python-urllib3 \
-    rsyslog
+    python-requests \
+    python-urllib3
 
 # grab gosu for easy step-down from root and tini for signal handling
 RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
@@ -77,6 +79,12 @@ RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364
   && gpg --verify /usr/local/bin/tini.asc \
   && rm /usr/local/bin/tini.asc \
   && chmod +x /usr/local/bin/tini
+
+# install cron and msmtp for outgoing email
+RUN apt-get install -y cron msmtp rsyslog
+
+# install useful tools
+RUN apt-get install -y less net-tools vim
 
 # install Node.JS repos and do another update...
 RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
@@ -114,10 +122,8 @@ COPY ./conf /root/conf/
 #Prepare the main install script
 RUN chmod u+x /root/conf/*.sh
 
-# expose relevant ports
-VOLUME ["/opt/wenotes/tools"]
-VOLUME ["/opt/wenotes/logs"]
-VOLUME ["/opt/wenotes/tools/options.json"]
+# expose relevant volumes
+VOLUME ["/opt/wenotes/tools", "/opt/wenotes/logs", "/opt/wenotes/tools/options.json", "/opt/wenotes/tools/msmtprc"]
 
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"

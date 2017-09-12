@@ -35,6 +35,22 @@ fi
 
 echo "starting services"
 
+# start rsyslogd
+echo "restarting rsyslog"
+service rsyslog restart
+echo `service rsyslog status`
+# restart cron
+echo "restarting cron"
+service cron restart
+echo `service cron status`
+
+# remove default msmtprc
+if [[ -f /opt/wenotes/tools/msmtprc ]] ; then
+    echo "moving our msmtprc to /etc and /etc/msmtprc to /etc/msmtprc.default"
+    mv /etc/msmtprc /etc/msmtprc.default
+    cp /opt/wenotes/tools/msmtprc /etc/msmtprc
+fi
+
 # next, get the Javascript code:
 # get the repo
 echo "moving to $WENOTES"
@@ -55,9 +71,12 @@ fi
 # set up Cron jobs...
 echo "setting up cron jobs"
 echo "# created by Docker and the OER Foundation" > $CRON
-echo "LOG=/opt/wenotes/cronttest" >> $CRON
+echo "MAILTO=webmaster@oerfoundation.org" >> $CRON
+echo "LOG=/opt/wenotes/logs/cronttest" >> $CRON
 echo "WEDIR=/opt/wenotes/tools" >> $CRON
-echo "PY=/usr/bin/python"
+echo "PY=/usr/bin/python" >> $CRON
+echo "TIME=`date`" >> $CRON
+echo '*/1 * * * * root echo "Cron ran at $TIME" >> $LOG' >> $CRON
 echo '8,18,28,38,48,58 * * * * root cd $WEDIR && nice $PY bookmarks.py && nice $PY medium.py' >> $CRON
 echo '6,16,26,36,46,56 * * * * root cd $WEDIR && nice $PY mastodon.py && nice $PY hypothesis.py' >> $CRON
 echo '4,14,24,34,44,54 * * * * root cd $WEDIR && nice $PY gplus.py && nice $PY feeds.py && nice $PY groups.py' >> $CRON
