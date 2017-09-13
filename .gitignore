@@ -2,3 +2,4 @@ options.json
 secrets
 tmp
 docker-compose.yml
+msmtprc
