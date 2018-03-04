@@ -2,6 +2,9 @@ From https://github.com/klaemo/docker-couchdb/tree/master/2.0.0
 
 See https://github.com/klaemo/docker-couchdb for documentation
 
+# update 2018-01-09
+Adding docker-wenotes-cron - might not need it, but cron in the docker-wenotes-tools container seems unreliable.
+
 # Starting CouchDB
 
 > docker run -d --name couchdb -v /home/dave/Docker/couchdb/data:/opt/couchdb/data oeru/couchdb

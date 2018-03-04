@@ -13,37 +13,42 @@
 
 set -e
 
-if [ "$1" = 'couchdb' ]; then
+if [ "$1" = '/opt/couchdb/bin/couchdb' ]; then
 	# we need to set the permissions here because docker mounts volumes as root
-	chown -R couchdb:couchdb \
-		/usr/local/var/lib/couchdb \
-		/usr/local/var/log/couchdb \
-		/usr/local/var/run/couchdb \
-		/usr/local/etc/couchdb
+	chown -R couchdb:couchdb /opt/couchdb
 
-	chmod -R 0770 \
-		/usr/local/var/lib/couchdb \
-		/usr/local/var/log/couchdb \
-		/usr/local/var/run/couchdb \
-		/usr/local/etc/couchdb
+	chmod -R 0770 /opt/couchdb/data
 
-	chmod 664 /usr/local/etc/couchdb/*.ini
-	chmod 775 /usr/local/etc/couchdb/*.d
+	chmod 664 /opt/couchdb/etc/*.ini
+	chmod 775 /opt/couchdb/etc/*.d
+
+	if [ ! -z "$NODENAME" ] && ! grep "couchdb@" /opt/couchdb/etc/vm.args; then
+		echo "-name couchdb@$NODENAME" >> /opt/couchdb/etc/vm.args
+	fi
+
+  # create the local settings
+  printf "[httpd]\nallow_jsonp = true\n"  > /opt/couchdb/etc/local.d/docker.ini
 
 	if [ "$COUCHDB_USER" ] && [ "$COUCHDB_PASSWORD" ]; then
 		# Create admin
-		printf "[admins]\n%s = %s\n" "$COUCHDB_USER" "$COUCHDB_PASSWORD" > /usr/local/etc/couchdb/local.d/docker.ini
+        echo "Setting admin access details"
+		    printf "[admins]\n%s = %s\n" "$COUCHDB_USER" "$COUCHDB_PASSWORD" >> /opt/couchdb/etc/local.d/docker.ini
         if [ "$COUCHDB_BOT_USER" ] && [ "$COUCHDB_BOT_PASSWORD" ]; then
-            printf "%s = %s\n" "$COUCHDB_BOT_USER" "$COUCHDB_BOT_PASSWORD" >> /usr/local/etc/couchdb/local.d/docker.ini
+            printf "%s = %s\n" "$COUCHDB_BOT_USER" "$COUCHDB_BOT_PASSWORD" >> /opt/couchdb/etc/local.d/docker.ini
         fi
-		chown couchdb:couchdb /usr/local/etc/couchdb/local.d/docker.ini
+        if [ "$COUCHDB_PROXYSECRET" ]; then
+            echo "Setting a proxy secret"
+            printf "[couch_httpd_auth]\nrequire_valid_user = true\nsecret = %s\n" "$COUCHDB_PROXYSECRET" >> /opt/couchdb/etc/local.d/docker.ini
+        else
+            printf "[couch_httpd_auth]\nrequire_valid_user = true\n" >> /opt/couchdb/etc/local.d/docker.ini
+        fi
 	fi
 
-	printf "[httpd]\nport = %s\nbind_address = %s\n" ${COUCHDB_HTTP_PORT:=5984} ${COUCHDB_HTTP_BIND_ADDRESS:=0.0.0.0} > /usr/local/etc/couchdb/local.d/bind_address.ini
-	chown couchdb:couchdb /usr/local/etc/couchdb/local.d/bind_address.ini
+  # set the permissions correctly
+  chown couchdb:couchdb /opt/couchdb/etc/local.d/docker.ini
 
 	# if we don't find an [admins] section followed by a non-comment, display a warning
-	if ! grep -Pzoqr '\[admins\]\n[^;]\w+' /usr/local/etc/couchdb; then
+	if ! grep -Pzoqr '\[admins\]\n[^;]\w+' /opt/couchdb/etc/local.d/*.ini; then
 		# The - option suppresses leading tabs but *not* spaces. :)
 		cat >&2 <<-'EOWARN'
 			****************************************************
@@ -58,6 +63,7 @@ if [ "$1" = 'couchdb' ]; then
 			****************************************************
 		EOWARN
 	fi
+
 
 	exec gosu couchdb "$@"
 fi

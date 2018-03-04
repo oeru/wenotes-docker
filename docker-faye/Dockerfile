@@ -21,19 +21,19 @@ MAINTAINER Dave Lane dave@oerfoundation.org
 # The aim: to make a manageable fully functional dev environment which
 # fosters remote API-ification for registering new blog users,
 # updating details for session validation, and possibly integrating Mautic...
-ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
-ENV APT_FILE sources.list
-ENV UBUNTU_NAME xenial
+#ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
+#ENV APT_FILE sources.list
+#ENV UBUNTU_NAME xenial
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
 #
 # add local mirror to reduce build time :)
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME} main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME} main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
 # do one update and start installing...
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     apt-transport-https \
@@ -45,9 +45,11 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     erlang-nox \
     erlang-reltool \
 #    libicu52 \
+    less \
     libmozjs185-1.0 \
     locales \
     openssl \
+    vim \
   && rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root and tini for signal handling
@@ -98,7 +100,7 @@ RUN chmod u+x /root/conf/*.sh
 
 # expose relevant ports
 EXPOSE 80
-VOLUME ["/opt/wenotes/server", "/opt/wenotes/options.json"]
+VOLUME ["/opt/wenotes", "/opt/conf"]
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"
 # Actually do it when we run the container.

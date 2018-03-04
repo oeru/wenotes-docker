@@ -10,32 +10,49 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-FROM debian:jessie
+FROM ubuntu:xenial
 
 MAINTAINER Dave Lane dave@oerfoundation.org
 # (adapted from work by Clemens Stolle klaemo@apache.org)
+
 # Purpose - run a full WENotes stack including the faye message server,
 # the wenotes service with couchdb, and various external processing tools
 #
 # The aim: to make a manageable fully functional dev environment which
 # fosters remote API-ification for registering new blog users,
 # updating details for session validation, and possibly integrating Mautic...
+ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
+ENV APT_FILE sources.list
+ENV UBUNTU_NAME xenial
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
+ENV COUCHDIR /opt/couchdb
+#
+# Add CouchDB user account
+RUN groupadd -r couchdb && useradd -d $COUCHDIR -g couchdb couchdb
 
-# Install instructions from https://cwiki.apache.org/confluence/display/COUCHDB/Debian
-
-RUN groupadd -r couchdb && useradd -d /var/lib/couchdb -g couchdb couchdb
-
+#
+# add local mirror to reduce build time :)
+RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
+RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME} main universe" >> /etc/apt/${APT_FILE}
+RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+# do one update and start installing...
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    apt-transport-https \
+    apt-utils \
     ca-certificates \
     curl \
+    git \
+    haproxy \
     erlang-nox \
-    libicu52 \
+    erlang-reltool \
+#    libicu52 \
     libmozjs185-1.0 \
-    libnspr4 \
-    libnspr4-0d \
     locales \
+    openssl \
   && rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root and tini for signal handling
@@ -52,59 +69,57 @@ RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364
   && rm /usr/local/bin/tini.asc \
   && chmod +x /usr/local/bin/tini
 
-# https://www.apache.org/dist/couchdb/KEYS
-ENV GPG_KEYS \
-  15DD4F3B8AACA54740EB78C7B7B7C53943ECCEE1 \
-  1CFBFA43C19B6DF4A0CA3934669C02FFDF3CEBA3 \
-  25BBBAC113C1BFD5AA594A4C9F96B92930380381 \
-  4BFCA2B99BADC6F9F105BEC9C5E32E2D6B065BFB \
-  5D680346FAA3E51B29DBCB681015F68F9DA248BC \
-  7BCCEB868313DDA925DF1805ECA5BCB7BB9656B0 \
-  C3F4DFAEAD621E1C94523AEEC376457E61D50B88 \
-  D2B17F9DA23C0A10991AF2E3D9EE01E47852AEE4 \
-  E0AF0A194D55C84E4A19A801CDB0C0F904F4EE9B
-RUN set -xe \
-  && for key in $GPG_KEYS; do \
-    gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-  done
+ENV COUCHDB_VERSION 2.0.0
 
-ENV COUCHDB_VERSION 1.6.1
-
-# download dependencies, compile and install couchdb,
-# set correct permissions, expose couchdb to the outside and disable logging to disk
-RUN buildDeps=' \
-    gcc \
-    g++ \
+# install Node.JS repos and do another update...
+RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
+  && echo 'deb https://deb.nodesource.com/node_4.x trusty main' > /etc/apt/sources.list.d/nodesource.list \
+  && echo 'deb-src https://deb.nodesource.com/node_4.x trusty main' >> /etc/apt/sources.list.d/nodesource.list \
+  && apt-get update -y -qq
+# Download dev dependencies
+RUN apt-get install -y --no-install-recommends \
+    build-essential \
     erlang-dev \
     libcurl4-openssl-dev \
     libicu-dev \
     libmozjs185-dev \
-    libnspr4-dev \
+  # install nodejs stack...
+  && apt-get install -y nodejs \
+  && npm install -g grunt-cli
+  # set up pm2
+  #RUN npm install -g pm2
+  # Acquire CouchDB source code
+  RUN cd /usr/src && mkdir couchdb \
+  && curl -fSL https://dist.apache.org/repos/dist/release/couchdb/source/${COUCHDB_VERSION}/apache-couchdb-${COUCHDB_VERSION}.tar.gz -o couchdb.tar.gz \
+  && tar -xzf couchdb.tar.gz -C couchdb --strip-components=1 \
+  && cd couchdb \
+  # Build the release and install into /opt
+  && ./configure --disable-docs \
+  && make release \
+  && mv /usr/src/couchdb/rel/couchdb $COUCHDIR \
+  # Cleanup build detritus
+  && apt-get purge -y \
+    binutils \
+    build-essential \
+    cpp \
+    git \
+    erlang-dev \
+    libicu-dev \
     make \
-  ' \
-  && apt-get update && apt-get install -y --no-install-recommends $buildDeps \
-  && curl -fSL http://apache.osuosl.org/couchdb/source/$COUCHDB_VERSION/apache-couchdb-$COUCHDB_VERSION.tar.gz -o couchdb.tar.gz \
-  && curl -fSL https://www.apache.org/dist/couchdb/source/$COUCHDB_VERSION/apache-couchdb-$COUCHDB_VERSION.tar.gz.asc -o couchdb.tar.gz.asc \
-  && gpg --verify couchdb.tar.gz.asc \
-  && mkdir -p /usr/src/couchdb \
-  && tar -xzf couchdb.tar.gz -C /usr/src/couchdb --strip-components=1 \
-  && cd /usr/src/couchdb \
-  && ./configure --with-js-lib=/usr/lib --with-js-include=/usr/include/mozjs \
-  && make && make install \
-  && apt-get purge -y --auto-remove $buildDeps \
-  && rm -rf /var/lib/apt/lists/* /usr/src/couchdb /couchdb.tar.gz* \
-  && chown -R couchdb:couchdb \
-    /usr/local/lib/couchdb /usr/local/etc/couchdb \
-    /usr/local/var/lib/couchdb /usr/local/var/log/couchdb /usr/local/var/run/couchdb \
-  && chmod -R g+rw \
-    /usr/local/lib/couchdb /usr/local/etc/couchdb \
-    /usr/local/var/lib/couchdb /usr/local/var/log/couchdb /usr/local/var/run/couchdb \
-  && mkdir -p /var/lib/couchdb \
-  && sed -e 's/^bind_address = .*$/bind_address = 0.0.0.0/' -i /usr/local/etc/couchdb/default.ini \
-  && sed -e 's!/usr/local/var/log/couchdb/couch.log$!/dev/null!' -i /usr/local/etc/couchdb/default.ini
+    perl \
+  && apt-get autoremove -y && apt-get clean \
+ # && apt-get install -y libicu52 --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules /usr/src/couchdb*
 
+# Sprinkle couchdb configuration to the right places...
+COPY couchdb/local.ini ${COUCHDIR}/etc/
+COPY couchdb/vm.args ${COUCHDIR}/etc/
 COPY couchdb/couchdb-init.sh /
-RUN chmod +x /couchdb-init.sh
+
+# Setup directories and permissions
+RUN chmod +x /couchdb-init.sh \
+  && mkdir ${COUCHDIR}/data ${COUCHDIR}/etc/local.d ${COUCHDIR}/etc/default.d \
+  && chown -R couchdb:couchdb ${COUCHDIR}
 
 # Set up the language variables
 ENV LANG en_NZ.UTF-8
@@ -117,11 +132,9 @@ RUN locale-gen $LANG
 RUN echo "export VISIBLE=now" >> /etc/profile \
   && echo "export TERM=xterm" >> /etc/bash.bashrc
 
-# Define mountable directories.
-VOLUME ["/usr/local/var/lib/couchdb"]
-
-EXPOSE 5984
-WORKDIR /var/lib/couchdb
-
+# expose relevant ports
+WORKDIR ${COUCHDIR}
+EXPOSE 5984 4369 9100
+VOLUME ["${COUCHDIR}/data"]
 ENTRYPOINT ["tini", "--", "/couchdb-init.sh"]
-CMD ["couchdb"]
+CMD ["/opt/couchdb/bin/couchdb"]
