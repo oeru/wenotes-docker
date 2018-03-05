@@ -5,10 +5,10 @@ apps:
       name : 'CouchWatch'
       merge_logs : true
       out_file : '/tmp/couchwatch.log'
-    - script : 'twitter.js'
-      name : 'Twitter Watcher'
+    - script : 'twitters.js'
+      name : 'Twitter Stream Watcher'
       merge_logs : true
-      out_file : '/tmp/twitter.log'
+      out_file : '/tmp/twitters.log'
     - script : 'irc.js'
       name : 'IRC Watcher'
       merge_logs : true

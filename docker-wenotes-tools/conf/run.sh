@@ -14,7 +14,6 @@ GIT=`which git`
 NPM=`which npm`
 PM2=`which pm2`
 CP=`which cp`
-CRON=/etc/cron.d/wenotes
 
 echo "CWD=$CWD, GIT=$GIT"
 
@@ -34,15 +33,6 @@ if [[ -f $CONF/pre-install.sh ]] ; then
 fi
 
 echo "starting services"
-
-# start rsyslogd
-echo "restarting rsyslog"
-service rsyslog restart
-echo `service rsyslog status`
-# restart cron
-echo "restarting cron"
-service cron restart
-echo `service cron status`
 
 # remove default msmtprc
 if [[ -f /opt/wenotes/tools/msmtprc ]] ; then
@@ -67,20 +57,6 @@ else
     mv /tmp/tools $WENOTES
 fi
 # set up options.json
-
-# set up Cron jobs...
-echo "setting up cron jobs"
-echo "# created by Docker and the OER Foundation" > $CRON
-echo "MAILTO=webmaster@oerfoundation.org" >> $CRON
-echo "LOG=/opt/wenotes/logs/crontest" >> $CRON
-echo "WEDIR=/opt/wenotes/tools" >> $CRON
-echo "PY=/usr/bin/python" >> $CRON
-echo '8,18,28,38,48,58 * * * * root cd $WEDIR && nice $PY bookmarks.py && nice $PY medium.py' >> $CRON
-echo '6,16,26,36,46,56 * * * * root cd $WEDIR && nice $PY mastodon.py && nice $PY hypothesis.py' >> $CRON
-echo '4,14,24,34,44,54 * * * * root cd $WEDIR && nice $PY gplus.py && nice $PY feeds.py && nice $PY groups.py' >> $CRON
-echo '2,12,22,32,42,52 * * * * root cd $WEDIR && nice $PY forums.py && nice $PY discourse.py --full' >> $CRON
-echo '*/1 * * * * root echo "Cron ran at $(date)" >> $LOG' >> $CRON
-chmod 0644 $CRON
 
 # next start various Javascript services
 if [[ -f $CONF/services.yml ]] ; then

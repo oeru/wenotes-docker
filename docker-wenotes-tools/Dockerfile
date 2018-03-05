@@ -21,9 +21,9 @@ MAINTAINER Dave Lane dave@oerfoundation.org
 # The aim: to make a manageable fully functional dev environment which
 # fosters remote API-ification for registering new blog users,
 # updating details for session validation, and possibly integrating Mautic...
-ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
-ENV APT_FILE sources.list
-ENV UBUNTU_NAME xenial
+#ENV APT_SERVER http://ucmirror.canterbury.ac.nz/ubuntu
+#ENV APT_FILE sources.list
+#ENV UBUNTU_NAME xenial
 # subdue the "Dialog" errors...
 ENV DEBIAN_FRONTEND noninteractive
 #
@@ -32,12 +32,12 @@ RUN groupadd -r couchdb && useradd -d /opt/couchdb -g couchdb couchdb
 
 #
 # add local mirror to reduce build time :)
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME} main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
-RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME} main universe" > /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME} main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-updates main universe" >> /etc/apt/${APT_FILE}
+#RUN echo "deb-src $APT_SERVER ${UBUNTU_NAME}-security main universe" >> /etc/apt/${APT_FILE}
 # do one update and start installing...
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     apt-transport-https \
