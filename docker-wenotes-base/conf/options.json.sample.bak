@@ -1,0 +1,106 @@
+{
+  "settings-url": "http://wenotes.oeru.org/resources/feed-sources.json",
+  "url": "http://bot:BOT_PASSWORD@couchdb2:5984",
+  "localcouch": "http://bot:BOT_PASSWORD@couchdb2:5984",
+  "couch": {
+    "user": "bot",
+    "pass": "BOT_PASSWORD",
+    "url": "http://couchdb2",
+    "port": 5984
+  },
+  "db": "mentions",
+  "dbfeeds": "feeds",
+  "dbvotes": "votes",
+  "avatars": "weavatars",
+  "server": {
+    "ip": "faye",
+    "port": 80,
+    "secureport": "",
+    "privkey": "",
+    "fullchain": ""
+  },
+  "logdir": "/opt/wenotes/log",
+  "log": {
+	  "couchwatch": {
+		  "level": 7,
+		  "file": "/tmp/couchwatch.log"
+	  },
+	  "twitters": {
+		  "level": 7,
+		  "file": "/tmp/twitters.log"
+	  },
+	  "twitter": {
+		  "level": 7,
+		  "file": "/tmp/twitter.log"
+	  },
+    "server": {
+		  "level": 7,
+		  "file": "/tmp/wenotes-server.log"
+	  }
+  },
+  "WEnotes": {
+    "RocketChat": {
+      "subscribe": "/WEnotes/*",
+      "channel": "#wenotes-all",
+      "webhook": "https://chat.oeru.org/hooks/ROCKETCHAT_WENOTES_HASH"
+    }
+  },
+  "IRC": {
+    "botname": "WikiEducatorBot",
+    "botpass": "lat45long",
+    "ircchannel": "#wikieducator",
+    "RocketChat": {
+      "channel": "#wikieducator-irc",
+      "webhook": "https://chat.oeru.org/hooks/ROCKETCHAT_IRC_HASH"
+    }
+  },
+  "RocketChat": {
+    "token": "post4WEnotes",
+    "tag": "oeru",
+    "baseURL": "https://chat.oeru.org/"
+
+  },
+  "googleapikey": "GOOGLE_API_KEY",
+  "googleapiserverkey": "GOOGLE_API_SERVER_KEY",
+  "moodleuser": "MOODLE_USER",
+  "moodlepass": "MOODLE_PASSWORD",
+  "tags": ["wikieducator", "ocl4ed", "oeru", "wenotes", "ds4oer", "uowmun", "oeru17"],
+  "blacklist": ["asiangirl", "japanesa", "panties", "nipples", "stockings", "oppai", "tits", "bigtits", "japanav", "gangbang", "blowjob", "pantsu", "buenosaires", "escuelacuzque", "milf", "lingerie", "ass", "pussy"],
+  "fayeurl": "http://faye/faye",
+  "fayepass": "FAYE_PASSWORD",
+  "twitter":  {
+     "consumer_key": "TWITTER_CONSUMER_KEY",
+     "consumer_secret": "TWITTER_CONSUMER_SECRET",
+     "access_token_key": "TWITTER_ACCESS_KEY",
+     "access_token_secret": "TWITTER_ACCESS_SECRET"
+   },
+   "gdata": {
+     "user": "GPLUS_USER_EMAIL",
+     "pass": "GPLUS_USER_PASSWORD"
+   },
+   "communities": [{"id":"110673383804329227095", "tag": "wikieducator"},
+     { "id":"107652967421847253472", "tag": "sp4ed"},
+     {"id":"101164183090938345449", "tag": "ocl4ed"}
+   ],
+   "discourse": "https://community.oeru.org",
+   "forums": {
+     "ds4oer": "https://forums.oeru.org/c/courses/ds4oer.json",
+     "csf101": "https://forums.oeru.org/tags/csf101.json",
+     "csf102": "https://forums.oeru.org/tags/csf102.json",
+     "csf103": "https://forums.oeru.org/tags/csf103.json",
+     "csf104": "https://forums.oeru.org/tags/csf104.json",
+     "lida101": "https://forums.oeru.org/tags/lida101.json",
+     "lida102": "https://forums.oeru.org/tags/lida102.json",
+     "lida103": "https://forums.oeru.org/tags/lida103.json",
+     "lida104": "https://forums.oeru.org/tags/lida104.json"
+   },
+   "bookmarks": {
+     "url": "https://bookmarks.oeru.org",
+   },
+   "hypothesis": {
+     "url": "https://hypothes.is",
+   },
+   "medium": {
+     "url": "https://medium.com"
+   }
+}
