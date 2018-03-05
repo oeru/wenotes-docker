@@ -34,29 +34,16 @@ fi
 
 echo "starting services"
 
-# remove default msmtprc
-if [[ -f /opt/wenotes/tools/msmtprc ]] ; then
-    echo "moving our msmtprc to /etc and /etc/msmtprc to /etc/msmtprc.default"
-    mv /etc/msmtprc /etc/msmtprc.default
-    cp /opt/wenotes/tools/msmtprc /etc/msmtprc
+# next start various Javascript services
+if [[ -f $CONF/services.yml ]] ; then
+    cd $WENOTES/tools
+    echo "installing Node.JS dependencies"
+    $NPM install
+    #$CP $CONF/options.json.sample options.json
+    echo "starting pm2 to supervise scripts in $CONF/services.yml"
+    $PM2 start --no-daemon $CONF/services.yml
+    cd $WENOTES
 fi
-
-# next, get the Javascript code:
-# get the repo
-echo "moving to $WENOTES"
-# get the repo
-echo "getting $WETOOLS, putting it into server"
-cd /tmp
-$GIT clone $WETOOLS tools
-cd $WENOTES
-if [[ -d $WENOTES/tools ]] ; then
-    echo "$WENOTES/tools already exists - moving /tmp/tools/* there..."
-    cp -a /tmp/tools/* $WENOTES/tools
-else
-    echo "creating $WENOTES/tools"
-    mv /tmp/tools $WENOTES
-fi
-# set up options.json
 
 echo "returning to original dir: $CWD"
 cd $CWD
