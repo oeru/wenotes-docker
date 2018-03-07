@@ -123,7 +123,7 @@ RUN echo "export VISIBLE=now" >> /etc/profile \
 #RUN chmod u+x /root/conf/*.sh
 
 # expose relevant volumes
-VOLUME ["/opt/wenotes/tools", "/opt/wenotes/logs", "/opt/wenotes/tools/options.json", "/opt/wenotes/tools/msmtprc"]
+VOLUME ["/opt/wenotes/tools", "/opt/wenotes/logs"]
 
 # First, say we're doing it
 #RUN echo "running run.sh - /root/conf/run.sh"

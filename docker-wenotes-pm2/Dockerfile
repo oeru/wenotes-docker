@@ -22,7 +22,7 @@ COPY ./conf /root/conf/
 RUN chmod u+x /root/conf/*.sh
 
 # expose relevant volumes
-VOLUME ["/opt/wenotes/tools", "/opt/wenotes/logs", "/opt/wenotes/tools/options.json", "/opt/wenotes/tools/msmtprc"]
+VOLUME ["/opt/wenotes/tools", "/opt/wenotes/logs", "/opt/wenotes/tools/msmtprc"]
 
 # First, say we're doing it
 RUN echo "running run.sh - /root/conf/run.sh"
