@@ -14,7 +14,7 @@ RUN set -ex \
         echo "PY=/usr/bin/python"; \
         echo '8,18,28,38,48,58 * * * * root cd $WEDIR && nice $PY bookmarks.py && nice $PY medium.py'; \
         echo '6,16,26,36,46,56 * * * * root cd $WEDIR && nice $PY mastodon.py && nice $PY hypothesis.py'; \
-        echo '4,14,24,34,44,54 * * * * root cd $WEDIR && nice $PY gplus.py && nice $PY feeds.py && nice $PY groups.py'; \
+        echo '4,14,24,34,44,54 * * * * root cd $WEDIR && nice $PY saylor-discourse.py && nice $PY feeds.py && nice $PY blog_feed.py'; \
         echo '2,12,22,32,42,52 * * * * root cd $WEDIR && nice $PY forums.py && nice $PY discourse.py --full'; \
         echo '*/1 * * * * root echo "Cron ran at $(date)" >> $LOG'; \
    } | tee /etc/cron.d/wenotes-cron
